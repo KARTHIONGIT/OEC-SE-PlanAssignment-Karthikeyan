@@ -29,7 +29,7 @@ namespace RL.Backend.Commands.Handlers.Plans
                 //    return ApiResponse<Unit>.Fail(new BadRequestException("Invalid UserId"));
 
                 var entitiesToDeactivate = await _context.ProcedureUsers
-               .Where(pu => pu.PlanId == request.PlanId && pu.ProcedureId == request.ProcedureId)
+               .Where(pu => pu.PlanId == request.PlanId && pu.ProcedureId == request.ProcedureId && pu.UserId != 0)
                .ToListAsync();
 
                 foreach (var entity in entitiesToDeactivate)
