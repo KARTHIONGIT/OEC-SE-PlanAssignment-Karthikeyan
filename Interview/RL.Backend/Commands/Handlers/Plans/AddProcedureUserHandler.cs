@@ -25,16 +25,19 @@ namespace RL.Backend.Commands.Handlers.Plans
                     return ApiResponse<Unit>.Fail(new BadRequestException("Invalid PlanId"));
                 if (request.ProcedureId < 1)
                     return ApiResponse<Unit>.Fail(new BadRequestException("Invalid ProcedureId"));
-                //if (request.UserIds.Any(x => x < 1))
-                //    return ApiResponse<Unit>.Fail(new BadRequestException("Invalid UserId"));
+                if (request.UserIds.Any(x => x < 1))
+                    return ApiResponse<Unit>.Fail(new BadRequestException("Invalid UserId"));
 
-                var entitiesToDeactivate = await _context.ProcedureUsers
-               .Where(pu => pu.PlanId == request.PlanId && pu.ProcedureId == request.ProcedureId && pu.UserId != 0)
-               .ToListAsync();
-
-                foreach (var entity in entitiesToDeactivate)
+                if (_context.ProcedureUsers.Any())
                 {
-                    entity.UserId = 0;
+                    var entitiesToDeactivate = await _context.ProcedureUsers
+                       .Where(pu => pu.PlanId == request.PlanId && pu.ProcedureId == request.ProcedureId && pu.UserId != 0)
+                       .ToListAsync();
+
+                    foreach (var entity in entitiesToDeactivate)
+                    {
+                        entity.UserId = 0;
+                    }
                 }
                 if (request.UserIds.Any())
                 {

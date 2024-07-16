@@ -6,8 +6,9 @@ import {
   getProcedures,
   getUsers,
   getProcedureUsers,
+  cleanUpProcedureUsers,
 } from "../../api/api";
-import Layout from '../Layout/Layout';
+import Layout from "../Layout/Layout";
 import ProcedureItem from "./ProcedureItem/ProcedureItem";
 import PlanProcedureItem from "./PlanProcedureItem/PlanProcedureItem";
 
@@ -16,17 +17,17 @@ const Plan = () => {
   const [procedures, setProcedures] = useState([]);
   const [planProcedures, setPlanProcedures] = useState([]);
   const [users, setUsers] = useState([]);
-  const [procedureUsers, setProcedureUsers] = useState([ ]);
+  const [procedureUsers, setProcedureUsers] = useState([]);
 
   useEffect(() => {
     (async () => {
+      var userOptions = [];
       var procedures = await getProcedures();
       var planProcedures = await getPlanProcedures(id);
       var users = await getUsers();
       var procedureMappedUsers = await getProcedureUsers(id);
-      var userOptions = [];
+      procedureMappedUsers?.some((x) => x.userId === 0) && await cleanUpProcedureUsers();
       users.map((u) => userOptions.push({ label: u.name, value: u.userId }));
-
       setUsers(userOptions);
       setProcedures(procedures);
       setPlanProcedures(planProcedures);
@@ -35,7 +36,9 @@ const Plan = () => {
   }, [id]);
 
   const handleAddProcedureToPlan = async (procedure) => {
-    const hasProcedureInPlan = planProcedures.some((p) => p.procedureId === procedure.procedureId);
+    const hasProcedureInPlan = planProcedures.some(
+      (p) => p.procedureId === procedure.procedureId
+    );
     if (hasProcedureInPlan) return;
 
     await addProcedureToPlan(id, procedure.procedureId);

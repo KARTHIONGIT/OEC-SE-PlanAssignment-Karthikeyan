@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ReactSelect from "react-select";
 
-import { addProcedureUsers, cleanUpProcedureUsers } from "../../../api/api";
+import { addProcedureUsers } from "../../../api/api";
 
 const PlanProcedureItem = ({ planId, procedure, users, procedureUsers }) => {
-
   const currentProcedureId = procedure.procedureId;
   const [selectedUsers, setSelectedUsers] = useState(null);
   const [options, setOptions] = useState(users);
@@ -23,27 +22,20 @@ const PlanProcedureItem = ({ planId, procedure, users, procedureUsers }) => {
       );
       setOptions(procedureUnmappedUsers);
       setSelectedUsers(procedureMappedUsers);
-    }
-    return async() => {
-      procedureUsers?.some(x => x.userId === 0) && await cleanUpProcedureUsers();
-    }
+    }    
   }, []);
 
   const handleAssignUserToProcedure = async (e) => {
     try {
       setSelectedUsers(e);
+      let usersToAdd;
       if (e?.length === 0) {
         setOptions(users);
-        const addResponse = await addProcedureUsers(planId, currentProcedureId, []);
+        usersToAdd = e;
       } else {
-        let userIds = e.map(x => x.value);
-        const addResponse = await addProcedureUsers(planId, currentProcedureId, userIds);
-        if (!addResponse.ok) {
-          throw new Error(
-            `Error adding users to procedure. error status: ${addResponse.status}`
-          );
-        }
+        usersToAdd = e.map((x) => x.value);
       }
+      await addProcedureUsers(planId, currentProcedureId, usersToAdd);
     } catch (error) {
       console.error(error);
     }

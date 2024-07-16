@@ -77,5 +77,6 @@ namespace RL.Backend.UnitTests
             result.Exception.Should().BeOfType(typeof(BadRequestException));
             result.Succeeded.Should().BeFalse();
         }
+
     }
 }

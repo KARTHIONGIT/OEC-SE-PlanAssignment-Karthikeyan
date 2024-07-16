@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using RL.Backend.Commands;
+using RL.Backend.Exceptions;
 using RL.Backend.Models;
 using RL.Data;
 using RL.Data.DataModels;
@@ -35,22 +36,29 @@ public class UsersController : ControllerBase
     [Route("GetProcedureUsers")]
     public IEnumerable<ProcedureUser> GetProcedureUsers(int planId)
     {
+        if (planId == default || planId <= 0)
+        {
+            throw (new BadRequestException(nameof(planId)));
+        }
         return _context.ProcedureUsers.Where(x => x.PlanId == planId);
     }
 
     [HttpPost("AddProcedureUsers")]
-    public async Task<IActionResult> AddProcedureUsers([FromBody]AddProcedureUserCommand command, CancellationToken token)
+    public async Task<IActionResult> AddProcedureUsers(AddProcedureUserCommand command, CancellationToken token)
     {
+        if (command == null || command == default)
+        {
+            throw (new BadRequestException(nameof(AddProcedureUserCommand)));
+        }
         var response = await _mediator.Send(command, token);
 
         return response.ToActionResult();
     }
 
     [HttpDelete("RemoveProcedureUsers")]
-    public async Task<IActionResult> DeleteProcedureUsers([FromBody]DeleteProcedureUserCommand command, CancellationToken token)
+    public async Task<IActionResult> DeleteProcedureUsers(DeleteProcedureUserCommand command, CancellationToken token)
     {
-        var response = await _mediator.Send(command, token);
-
-        return response.ToActionResult();
+        await _mediator.Send(command, token);
+        return Ok();
     }
 }
